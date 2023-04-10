@@ -52,9 +52,6 @@ class MainActivity : ComponentActivity() {
                         MainVM.ViewState.Empty -> {
                             Greeting(name = "EMPTY STATE")
                         }
-                        MainVM.ViewState.ButtonClick -> {
-                            Greeting(name = "BUTTON CLICK")
-                        }
                     }
                 }
             }

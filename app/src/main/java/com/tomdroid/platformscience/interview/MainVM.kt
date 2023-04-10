@@ -72,7 +72,5 @@ class MainVM @Inject constructor(
     sealed class ViewState {
         object Empty: ViewState()
         data class Content(val routes: List<Route>): ViewState()
-
-        object ButtonClick: ViewState()
     }
 }
