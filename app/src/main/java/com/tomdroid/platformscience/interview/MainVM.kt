@@ -12,11 +12,9 @@ import com.tomdroid.platformscience.interview.strategies.suitabilityscore.Defaul
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -38,13 +36,7 @@ class MainVM @Inject constructor(
         }
     }
 
-    private val _textInputStateFlow = MutableStateFlow("")
-
-    fun rootFlow(): Flow<ViewState> =
-        merge(
-            mapDataToViewState()
-        )
-
+    fun rootFlow(): Flow<ViewState> = mapDataToViewState()
     private fun fetchDataForScreenFlow(): Flow<List<Route>> {
 
         return combine(
@@ -76,15 +68,11 @@ class MainVM @Inject constructor(
             }
     }
 
-    fun onTextEventReceived(textInput: String) {
-
-        _textInputStateFlow.value = textInput
-
-    }
-
 
     sealed class ViewState {
         object Empty: ViewState()
         data class Content(val routes: List<Route>): ViewState()
+
+        object ButtonClick: ViewState()
     }
 }

@@ -35,21 +35,25 @@ class MainActivity : ComponentActivity() {
 
                     when (val viewState = vm.rootFlow().collectAsState(initial = MainVM.ViewState.Empty).value) {
                         is MainVM.ViewState.Content -> {
-                                LazyColumn {
-                                    items(viewState.routes) { theItem ->
-                                        DriverRouteAccordianItem(
-                                            route = theItem,
-                                        )
-                                    }
+                            LazyColumn {
 
-                                    item {
-                                        Text(text = "Total Score: ${viewState.routes.fold(0.0) { acc, route -> acc + route.suitabilityScore }}")
-                                    }
+                                items(viewState.routes) { theItem ->
+                                    DriverRouteAccordianItem(
+                                        route = theItem,
+                                    )
                                 }
+
+                                item {
+                                    Text(text = "Total Score: ${viewState.routes.fold(0.0) { acc, route -> acc + route.suitabilityScore }}")
+                                }
+                            }
 
                         }
                         MainVM.ViewState.Empty -> {
                             Greeting(name = "EMPTY STATE")
+                        }
+                        MainVM.ViewState.ButtonClick -> {
+                            Greeting(name = "BUTTON CLICK")
                         }
                     }
                 }
