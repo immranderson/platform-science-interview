@@ -1,6 +1,5 @@
 package com.tomdroid.platformscience.interview
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tomdroid.platformscience.interview.data.repos.DriverRepo
@@ -10,13 +9,12 @@ import com.tomdroid.platformscience.interview.models.RouteCalculator
 import com.tomdroid.platformscience.interview.strategies.assignment.HungarianAssignmentStrategy
 import com.tomdroid.platformscience.interview.strategies.suitabilityscore.DefaultSuitabilityScoreStrategy
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,15 +26,13 @@ class MainVM @Inject constructor(
 
 ): ViewModel() {
 
+    private val _viewStateFlow = MutableStateFlow<ViewState>(ViewState.Loading)
+    fun viewStateFlow(): StateFlow<ViewState> = _viewStateFlow.asStateFlow()
+
     init {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                rootFlow().collect()
-            }
-        }
+        fetchRoutesToDisplay()
     }
 
-    fun rootFlow(): Flow<ViewState> = mapDataToViewState()
     private fun fetchDataForScreenFlow(): Flow<List<Route>> {
 
         return combine(
@@ -60,17 +56,23 @@ class MainVM @Inject constructor(
 
     }
 
-    private fun mapDataToViewState(): Flow<ViewState> {
-        return fetchDataForScreenFlow()
-            .map {
-                Log.d(this::class.java.toString(), "$it")
-                ViewState.Content(it)
-            }
+    fun fetchRoutesToDisplay() {
+        viewModelScope.launch {
+            fetchDataForScreenFlow()
+                .collect {
+                    if (it.isEmpty()) {
+                        _viewStateFlow.value = ViewState.Empty
+                    } else {
+                        _viewStateFlow.value = ViewState.Content(it)
+                    }
+                }
+        }
     }
 
 
     sealed class ViewState {
         object Empty: ViewState()
+        object Loading: ViewState()
         data class Content(val routes: List<Route>): ViewState()
     }
 }
